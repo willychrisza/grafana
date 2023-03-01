@@ -6,9 +6,9 @@ import (
 	"net/url"
 	"testing"
 
+	"github.com/aws/smithy-go/ptr"
 	"github.com/google/uuid"
 	"github.com/grafana/grafana-plugin-sdk-go/data"
-	ptr "github.com/xorcare/pointer"
 
 	"github.com/grafana/grafana/pkg/infra/log/logtest"
 	"github.com/grafana/grafana/pkg/services/ngalert/eval"
@@ -56,6 +56,6 @@ goarch: amd64
 pkg: github.com/grafana/grafana/pkg/services/ngalert/state
 cpu: 11th Gen Intel(R) Core(TM) i9-11900H @ 2.50GHz
 BenchmarkGetOrCreateTest
-BenchmarkGetOrCreateTest-16         7894            150920 ns/op
+BenchmarkGetOrCreateTest-16        48218             26160 ns/op
 PASS
 */
