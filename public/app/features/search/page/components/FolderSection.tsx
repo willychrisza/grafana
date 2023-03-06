@@ -61,8 +61,8 @@ export const FolderSection = ({
       selectionToggle(section.kind, section.uid);
       const sub = results.value ?? [];
       for (const item of sub) {
-        if (selection('dashboard', item.uid!) !== checked) {
-          selectionToggle('dashboard', item.uid!);
+        if (selection(item.kind, item.uid!) !== checked) {
+          selectionToggle(item.kind, item.uid!);
         }
       }
     }
@@ -114,7 +114,7 @@ export const FolderSection = ({
             onTagSelected={onTagSelected}
             onToggleChecked={(item) => {
               if (selectionToggle) {
-                selectionToggle('dashboard', item.uid);
+                selectionToggle('folder', item.uid);
               }
             }}
             editable={Boolean(selection != null)}
