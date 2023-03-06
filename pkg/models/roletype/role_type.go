@@ -9,36 +9,39 @@ import (
 type RoleType string
 
 const (
+	RoleNone   RoleType = "None"
 	RoleViewer RoleType = "Viewer"
 	RoleEditor RoleType = "Editor"
 	RoleAdmin  RoleType = "Admin"
 )
 
 func (r RoleType) IsValid() bool {
-	return r == RoleViewer || r == RoleAdmin || r == RoleEditor
+	return r == RoleViewer || r == RoleAdmin || r == RoleEditor || r == RoleNone
 }
 
 func (r RoleType) Includes(other RoleType) bool {
-	if r == RoleAdmin {
+	switch r {
+	case RoleAdmin:
 		return true
-	}
-
-	if r == RoleEditor {
+	case RoleEditor:
 		return other != RoleAdmin
+	case RoleViewer:
+		return other == RoleNone || r == other
 	}
-
 	return r == other
 }
 
 func (r RoleType) Children() []RoleType {
 	switch r {
 	case RoleAdmin:
-		return []RoleType{RoleEditor, RoleViewer}
+		return []RoleType{RoleEditor, RoleViewer, RoleNone}
 	case RoleEditor:
-		return []RoleType{RoleViewer}
-	default:
-		return nil
+		return []RoleType{RoleViewer, RoleNone}
+	case RoleViewer:
+		return []RoleType{RoleNone}
 	}
+
+	return nil
 }
 
 func (r RoleType) Parents() []RoleType {

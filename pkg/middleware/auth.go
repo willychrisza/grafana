@@ -23,8 +23,9 @@ import (
 
 type AuthOptions struct {
 	ReqGrafanaAdmin bool
-	ReqSignedIn     bool
+	ReqHasRole      bool
 	ReqNoAnonynmous bool
+	ReqSignedIn     bool
 }
 
 func accessForbidden(c *contextmodel.ReqContext) {
@@ -141,6 +142,12 @@ func Auth(options *AuthOptions) web.Handler {
 		}
 
 		if !c.IsGrafanaAdmin && options.ReqGrafanaAdmin {
+			accessForbidden(c)
+			return
+		}
+
+		// Deny access to users without a role
+		if c.OrgRole == models.ROLE_NONE && options.ReqHasRole {
 			accessForbidden(c)
 			return
 		}
