@@ -50,6 +50,8 @@ func (r RoleType) Parents() []RoleType {
 		return []RoleType{RoleAdmin}
 	case RoleViewer:
 		return []RoleType{RoleEditor, RoleAdmin}
+	case RoleNone:
+		return []RoleType{RoleViewer, RoleEditor, RoleAdmin}
 	default:
 		return nil
 	}
