@@ -104,8 +104,8 @@ describe('<EditDataSourcePage>', () => {
 
     // Buttons
     expect(screen.queryByRole('button', { name: /Back/i })).toBeVisible();
-    expect(screen.queryByRole('button', { name: /Delete/i })).toBeVisible();
+    expect(screen.queryAllByRole('button', { name: /Delete/i })).toHaveLength(2);
     expect(screen.queryByRole('button', { name: /Save (.*) test/i })).toBeVisible();
-    expect(screen.queryByText('Explore')).toBeVisible();
+    expect(screen.queryAllByText('Explore')).toHaveLength(2);
   });
 });
