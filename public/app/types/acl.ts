@@ -4,6 +4,7 @@ import { Permission } from '@grafana/schema';
 export { Permission as TeamPermissionLevel };
 
 export enum OrgRole {
+  None = 'None',
   Viewer = 'Viewer',
   Editor = 'Editor',
   Admin = 'Admin',
