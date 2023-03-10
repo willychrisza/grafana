@@ -25,9 +25,11 @@ export interface Props {
   label?: ReactNode;
   /** Set the latest selectable date */
   maxDate?: Date;
+  /** Set the minimum selectable date */
+  minDate?: Date;
 }
 
-export const DateTimePicker = ({ date, maxDate, label, onChange }: Props) => {
+export const DateTimePicker = ({ date, maxDate, minDate, label, onChange }: Props) => {
   const [isOpen, setOpen] = useState(false);
 
   const ref = useRef<HTMLDivElement>(null);
@@ -86,6 +88,7 @@ export const DateTimePicker = ({ date, maxDate, label, onChange }: Props) => {
                   isFullscreen={true}
                   onClose={() => setOpen(false)}
                   maxDate={maxDate}
+                  minDate={minDate}
                   ref={setSelectorElement}
                   style={popper.styles.popper}
                 />
@@ -100,6 +103,8 @@ export const DateTimePicker = ({ date, maxDate, label, onChange }: Props) => {
                 <div className={styles.modal}>
                   <DateTimeCalendar
                     date={date}
+                    maxDate={maxDate}
+                    minDate={minDate}
                     onChange={onApply}
                     isFullscreen={false}
                     onClose={() => setOpen(false)}
@@ -120,6 +125,7 @@ interface DateTimeCalendarProps {
   onClose: () => void;
   isFullscreen: boolean;
   maxDate?: Date;
+  minDate?: Date;
   style?: React.CSSProperties;
 }
 
@@ -191,7 +197,7 @@ const DateTimeInput = React.forwardRef<HTMLInputElement, InputProps>(
 DateTimeInput.displayName = 'DateTimeInput';
 
 const DateTimeCalendar = React.forwardRef<HTMLDivElement, DateTimeCalendarProps>(
-  ({ date, onClose, onChange, isFullscreen, maxDate, style }, ref) => {
+  ({ date, onClose, onChange, isFullscreen, maxDate, minDate, style }, ref) => {
     const calendarStyles = useStyles2(getBodyStyles);
     const styles = useStyles2(getStyles);
     const [internalDate, setInternalDate] = useState<Date>(() => {
@@ -235,6 +241,7 @@ const DateTimeCalendar = React.forwardRef<HTMLDivElement, DateTimeCalendarProps>
           className={calendarStyles.body}
           tileClassName={calendarStyles.title}
           maxDate={maxDate}
+          minDate={minDate}
         />
         <div className={styles.time}>
           <TimeOfDayPicker showSeconds={true} onChange={onChangeTime} value={dateTime(internalDate)} />
