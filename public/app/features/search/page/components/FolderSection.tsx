@@ -44,7 +44,7 @@ export const FolderSection = ({
     }
 
     const searcher = getGrafanaSearcher();
-    const childItems = searcher.getFolderChildren(section.uid);
+    const childItems = searcher.getFolderChildren(section.uid, section.title);
 
     return childItems;
   }, [sectionExpanded, tags]);

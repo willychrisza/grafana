@@ -80,7 +80,7 @@ export interface GrafanaSearcher {
   getSortOptions: () => Promise<SelectableValue[]>;
   sortPlaceholder?: string;
 
-  getFolderChildren: (folderUid?: string) => Promise<DashboardViewItem[]>;
+  getFolderChildren: (parentUid?: string, parentTitle?: string) => Promise<DashboardViewItem[]>;
 
   /** Gets the default sort used for the Folder view */
   getFolderViewSort: () => string;

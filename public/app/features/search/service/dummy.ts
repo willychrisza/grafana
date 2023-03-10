@@ -41,7 +41,7 @@ export class DummySearcher implements GrafanaSearcher {
     return '';
   }
 
-  async getFolderChildren(folderUid?: string): Promise<DashboardViewItem[]> {
+  async getFolderChildren(parentUid?: string, parentTitle?: string): Promise<DashboardViewItem[]> {
     return [];
   }
 }
