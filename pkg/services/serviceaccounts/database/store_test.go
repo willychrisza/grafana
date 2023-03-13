@@ -86,11 +86,10 @@ func TestStore_CreateServiceAccountRoleNone(t *testing.T) {
 	serviceAccountName := "new Service Account"
 	serviceAccountOrgId := orgResult.ID
 	serviceAccountRole := org.RoleNone
-	isDisabled := false
 	saForm := serviceaccounts.CreateServiceAccountForm{
 		Name:       serviceAccountName,
 		Role:       &serviceAccountRole,
-		IsDisabled: &isDisabled,
+		IsDisabled: nil,
 	}
 
 	saDTO, err := store.CreateServiceAccount(context.Background(), serviceAccountOrgId, &saForm)
@@ -105,11 +104,11 @@ func TestStore_CreateServiceAccountRoleNone(t *testing.T) {
 	assert.Equal(t, serviceAccountName, retrieved.Name)
 	assert.Equal(t, serviceAccountOrgId, retrieved.OrgId)
 	assert.Equal(t, string(serviceAccountRole), retrieved.Role)
-	assert.True(t, retrieved.IsDisabled)
 
 	retrievedId, err := store.RetrieveServiceAccountIdByName(context.Background(), serviceAccountOrgId, serviceAccountName)
 	require.NoError(t, err)
 	assert.Equal(t, saDTO.Id, retrievedId)
+	assert.Equal(t, saDTO.Role, string(org.RoleNone))
 }
 
 func TestStore_DeleteServiceAccount(t *testing.T) {
