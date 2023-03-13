@@ -27,7 +27,10 @@ func (r RoleType) Includes(other RoleType) bool {
 		return other != RoleAdmin
 	case RoleViewer:
 		return other == RoleNone || r == other
+	case RoleNone: // exhaustive lint obligation
+		return r == other
 	}
+
 	return r == other
 }
 
@@ -39,6 +42,8 @@ func (r RoleType) Children() []RoleType {
 		return []RoleType{RoleViewer, RoleNone}
 	case RoleViewer:
 		return []RoleType{RoleNone}
+	case RoleNone: // exhaustive lint obligation
+		return []RoleType{}
 	}
 
 	return nil
