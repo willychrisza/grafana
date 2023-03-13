@@ -1,14 +1,9 @@
+import { OrgRole } from '@grafana/data';
 import { Permission } from '@grafana/schema';
 
 // Alias to an existing type to reduce the number of changes
 export { Permission as TeamPermissionLevel };
-
-export enum OrgRole {
-  None = 'None',
-  Viewer = 'Viewer',
-  Editor = 'Editor',
-  Admin = 'Admin',
-}
+export { OrgRole as OrgRole };
 
 export interface DashboardAclDTO {
   id?: number;
