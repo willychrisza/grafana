@@ -29,10 +29,12 @@ const meta: ComponentMeta<typeof DateTimePicker> = {
     },
     minDate: { control: 'date' },
     maxDate: { control: 'date' },
+    showSeconds: { control: 'boolean' },
   },
   args: {
     minDate: minimumDate,
     maxDate: today,
+    showSeconds: true,
   },
   parameters: {
     docs: {
@@ -41,7 +43,7 @@ const meta: ComponentMeta<typeof DateTimePicker> = {
   },
 };
 
-export const Basic: ComponentStory<typeof DateTimePicker> = ({ label, minDate, maxDate }) => {
+export const Basic: ComponentStory<typeof DateTimePicker> = ({ label, minDate, maxDate, showSeconds }) => {
   const [date, setDate] = useState<DateTime>(dateTime(today));
   // the minDate arg can change from Date object to number, we need to handle this
   // scenario to avoid a crash in the component's story.
@@ -54,6 +56,7 @@ export const Basic: ComponentStory<typeof DateTimePicker> = ({ label, minDate, m
       minDate={minDateVal}
       maxDate={maxDateVal}
       date={date}
+      showSeconds={showSeconds}
       onChange={(newValue) => {
         action('on change')(newValue);
         setDate(newValue);
