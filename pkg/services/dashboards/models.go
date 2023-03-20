@@ -409,6 +409,7 @@ type FindPersistedDashboardsQuery struct {
 	DashboardUIDs []string
 	Type          string
 	FolderIds     []int64
+	FolderUIDs    []string
 	Tags          []string
 	Limit         int64
 	Page          int64

@@ -61,7 +61,12 @@ func (hs *HTTPServer) Search(c *contextmodel.ReqContext) response.Response {
 		}
 	}
 
-	if len(dbIDs) > 0 && len(dbUIDs) > 0 {
+	folderUIDs := c.QueryStrings("folderUIDs")
+
+	bothDashboardIds := len(dbIDs) > 0 && len(dbUIDs) > 0
+	bothFolderIds := len(folderIDs) > 0 && len(folderUIDs) > 0
+
+	if bothDashboardIds || bothFolderIds {
 		return response.Error(400, "search supports UIDs or IDs, not both", nil)
 	}
 
@@ -77,6 +82,7 @@ func (hs *HTTPServer) Search(c *contextmodel.ReqContext) response.Response {
 		DashboardUIDs: dbUIDs,
 		Type:          dashboardType,
 		FolderIds:     folderIDs,
+		FolderUIDs:    folderUIDs,
 		Permission:    permission,
 		Sort:          sort,
 	}
