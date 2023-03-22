@@ -1,15 +1,14 @@
 package definitions
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/grafana/alerting/logging"
 	alertingNotify "github.com/grafana/alerting/notify"
 	"github.com/grafana/alerting/receivers"
 
 	"github.com/grafana/grafana/pkg/components/simplejson"
 	"github.com/grafana/grafana/pkg/services/ngalert/notifier/channels_config"
-	"github.com/grafana/grafana/pkg/setting"
 )
 
 // swagger:route GET /api/v1/provisioning/contact-points provisioning stable RouteGetContactpoints
@@ -108,21 +107,25 @@ func (e *EmbeddedContactPoint) Valid(decryptFunc receivers.GetDecryptedValueFn) 
 	if e.Settings == nil {
 		return fmt.Errorf("settings should not be empty")
 	}
-	factory, exists := alertingNotify.Factory(e.Type)
-	if !exists {
-		return fmt.Errorf("unknown type '%s'", e.Type)
-	}
 	jsonBytes, err := e.Settings.MarshalJSON()
 	if err != nil {
 		return err
 	}
-	cfg, _ := receivers.NewFactoryConfig(&receivers.NotificationChannelConfig{
-		Settings: jsonBytes,
-		Type:     e.Type,
-	}, nil, decryptFunc, nil, nil, func(ctx ...interface{}) logging.Logger {
-		return &logging.FakeLogger{}
-	}, setting.BuildVersion)
-	if _, err := factory(cfg); err != nil {
+	_, err = alertingNotify.BuildReceiverConfiguration(context.Background(), &alertingNotify.APIReceiver{
+		GrafanaReceivers: alertingNotify.GrafanaReceivers{
+			Receivers: []*alertingNotify.GrafanaReceiver{
+				{
+					UID:                   e.UID,
+					Name:                  e.Name,
+					Type:                  e.Type,
+					DisableResolveMessage: e.DisableResolveMessage,
+					Settings:              jsonBytes,
+					SecureSettings:        nil,
+				},
+			},
+		},
+	}, decryptFunc)
+	if err != nil {
 		return err
 	}
 	return nil
