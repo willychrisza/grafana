@@ -2,6 +2,8 @@ package apiserver
 
 import (
 	"context"
+	"fmt"
+	kubeoptions "k8s.io/kubernetes/pkg/kubeapiserver/options"
 	"net"
 	"path"
 
@@ -62,8 +64,29 @@ func (s *service) GetRestConfig() *rest.Config {
 
 func (s *service) start(ctx context.Context) error {
 	serverRunOptions := options.NewServerRunOptions()
+	serverRunOptions.ServiceClusterIPRanges = kubeoptions.DefaultServiceIPCIDR.String()
 	serverRunOptions.SecureServing.BindAddress = net.ParseIP(DEFAULT_IP)
-	serverRunOptions.SecureServing.ServerCert.CertDirectory = s.dataPath
+
+	err := serverRunOptions.GenericServerRunOptions.DefaultAdvertiseAddress(serverRunOptions.SecureServing.SecureServingOptions)
+	if err != nil {
+		fmt.Errorf("error getting default advertise address of apiserver for cert generation: %s", err.Error())
+		return nil
+	}
+
+	apiServerServiceIP, _, _, err := getServiceIPAndRanges(serverRunOptions.ServiceClusterIPRanges)
+	if err != nil {
+		fmt.Errorf("error getting service ip of apiserver for cert generation: %s", err.Error())
+		return nil
+	}
+
+	certKey, err := newApiServerCertKey(serverRunOptions.GenericServerRunOptions.AdvertiseAddress.String(), apiServerServiceIP)
+	if err != nil {
+		fmt.Errorf("error provisiong TLS cert/key for use with apiserver: %s", err.Error())
+		return nil
+	}
+
+	serverRunOptions.SecureServing.ServerCert.CertKey = *certKey
+
 	serverRunOptions.Authentication.ServiceAccounts.Issuers = []string{DEFAULT_HOST}
 	etcdConfig := s.etcdProvider.GetConfig()
 	serverRunOptions.Etcd.StorageConfig.Transport.ServerList = etcdConfig.Endpoints
