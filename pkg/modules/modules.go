@@ -10,6 +10,7 @@ import (
 	"github.com/grafana/grafana/pkg/api"
 	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/registry/corecrd"
+	"github.com/grafana/grafana/pkg/services/certgenerator"
 	"github.com/grafana/grafana/pkg/services/k8s/apiserver"
 	"github.com/grafana/grafana/pkg/services/k8s/client"
 	"github.com/grafana/grafana/pkg/services/k8s/informer"
@@ -21,6 +22,7 @@ import (
 // List of available targets.
 const (
 	All                 string = "all"
+	CertGenerator       string = "cert-generator"
 	HTTPServer          string = "http-server"
 	Kine                string = "kine"
 	KubernetesCRDs      string = "kubernetes-crds"
@@ -59,6 +61,7 @@ type service struct {
 
 	publicDashboardWebhooks *publicDashboardWebhooks.WebhooksAPI
 	apiServer               apiserver.Service
+	certGenerator           certgenerator.Service
 	crdRegistry             *corecrd.Registry
 	kineService             kine.Service
 	intormerService         informer.Service
@@ -69,6 +72,7 @@ type service struct {
 func ProvideService(
 	cfg *setting.Cfg,
 	apiServer apiserver.Service,
+	certGenerator certgenerator.Service,
 	crdRegistry *corecrd.Registry,
 	kineService kine.Service,
 	informerService informer.Service,
@@ -79,9 +83,10 @@ func ProvideService(
 	logger := log.New("modules")
 
 	dependencyMap := map[string][]string{
-		HTTPServer:              {KubernetesAPIServer},
+		CertGenerator:           {},
+		HTTPServer:              {CertGenerator},
 		Kine:                    {},
-		KubernetesAPIServer:     {Kine},
+		KubernetesAPIServer:     {CertGenerator, Kine},
 		KubernetesClientset:     {KubernetesAPIServer},
 		KubernetesCRDs:          {KubernetesClientset},
 		KubernetesInformers:     {KubernetesCRDs},
@@ -101,6 +106,7 @@ func ProvideService(
 
 		publicDashboardWebhooks: publicDashboardWebhooks,
 		apiServer:               apiServer,
+		certGenerator:           certGenerator,
 		crdRegistry:             crdRegistry,
 		kineService:             kineService,
 		intormerService:         informerService,
@@ -115,6 +121,7 @@ func (m *service) Init(_ context.Context) error {
 
 	// module registration
 	m.RegisterInvisibleModule(HTTPServer, m.httpServerInit)
+	m.RegisterModule(CertGenerator, m.certGeneratorInit)
 	m.RegisterModule(Kine, m.kineInit)
 	m.RegisterModule(KubernetesAPIServer, m.k8sApiServerInit)
 	m.RegisterModule(KubernetesClientset, m.k8sClientsetInit)
@@ -219,6 +226,10 @@ func (m *service) RegisterInvisibleModule(name string, initFn func() (services.S
 // IsModuleEnabled returns true if the module is enabled.
 func (m *service) IsModuleEnabled(name string) bool {
 	return stringsContain(m.targets, name)
+}
+
+func (m *service) certGeneratorInit() (services.Service, error) {
+	return m.certGenerator, nil
 }
 
 func (m *service) k8sApiServerInit() (services.Service, error) {

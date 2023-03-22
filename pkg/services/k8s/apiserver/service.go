@@ -8,8 +8,10 @@ import (
 	"path"
 
 	"github.com/grafana/dskit/services"
+	"github.com/grafana/grafana/pkg/services/certgenerator"
 	"github.com/grafana/grafana/pkg/services/k8s/kine"
 	"github.com/grafana/grafana/pkg/setting"
+	serveroptions "k8s.io/apiserver/pkg/server/options"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
@@ -73,19 +75,10 @@ func (s *service) start(ctx context.Context) error {
 		return nil
 	}
 
-	apiServerServiceIP, _, _, err := getServiceIPAndRanges(serverRunOptions.ServiceClusterIPRanges)
-	if err != nil {
-		fmt.Errorf("error getting service ip of apiserver for cert generation: %s", err.Error())
-		return nil
+	serverRunOptions.SecureServing.ServerCert.CertKey = serveroptions.CertKey{
+		CertFile: certgenerator.APIServerCertFile,
+		KeyFile:  certgenerator.APIServerKeyFile,
 	}
-
-	certKey, err := newApiServerCertKey(serverRunOptions.GenericServerRunOptions.AdvertiseAddress.String(), apiServerServiceIP)
-	if err != nil {
-		fmt.Errorf("error provisiong TLS cert/key for use with apiserver: %s", err.Error())
-		return nil
-	}
-
-	serverRunOptions.SecureServing.ServerCert.CertKey = *certKey
 
 	serverRunOptions.Authentication.ServiceAccounts.Issuers = []string{DEFAULT_HOST}
 	etcdConfig := s.etcdProvider.GetConfig()
