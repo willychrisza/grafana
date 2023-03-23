@@ -181,6 +181,7 @@ func (srv PrometheusSrv) RouteGetRuleStatuses(c *contextmodel.ReqContext) respon
 		sortedGroups = append(sortedGroups, groupKey)
 	}
 	sort.Sort(sortedGroups)
+	ruleResponse.Data.Total = int64(len(sortedGroups))
 
 	for i, groupKey := range sortedGroups {
 		if limitGroups > -1 && int64(i) >= limitGroups {
@@ -188,6 +189,7 @@ func (srv PrometheusSrv) RouteGetRuleStatuses(c *contextmodel.ReqContext) respon
 		}
 
 		rules := groupedRules[groupKey]
+		numRulesWithoutLimit := len(rules)
 		if limitRulesPerGroup > -1 {
 			rules = rules[0:limitRulesPerGroup]
 		}
@@ -201,6 +203,7 @@ func (srv PrometheusSrv) RouteGetRuleStatuses(c *contextmodel.ReqContext) respon
 			continue
 		}
 		ruleGroup := srv.toRuleGroup(groupKey.RuleGroup, folder, rules, limitAlertsPerRule, labelOptions)
+		ruleGroup.Total = int64(numRulesWithoutLimit)
 		ruleResponse.Data.RuleGroups = append(ruleResponse.Data.RuleGroups, ruleGroup)
 	}
 	return response.JSON(http.StatusOK, ruleResponse)
@@ -229,7 +232,8 @@ func (srv PrometheusSrv) toRuleGroup(groupName string, folder *folder.Folder, ru
 			LastEvaluation: time.Time{},
 		}
 
-		for i, alertState := range srv.manager.GetStatesForRuleUID(rule.OrgID, rule.UID) {
+		states := srv.manager.GetStatesForRuleUID(rule.OrgID, rule.UID)
+		for i, alertState := range states {
 			if limitAlerts > -1 && int64(i) >= limitAlerts {
 				break
 			}
@@ -280,6 +284,7 @@ func (srv PrometheusSrv) toRuleGroup(groupName string, folder *folder.Folder, ru
 		}
 
 		alertingRule.Rule = newRule
+		alertingRule.Total = int64(len(states))
 		newGroup.Rules = append(newGroup.Rules, alertingRule)
 		newGroup.Interval = float64(rule.IntervalSeconds)
 		// TODO yuri. Change that when scheduler will process alerts in groups
