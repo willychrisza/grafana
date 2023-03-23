@@ -164,7 +164,7 @@ func (srv PrometheusSrv) RouteGetRuleStatuses(c *contextmodel.ReqContext) respon
 		return accesscontrol.HasAccess(srv.ac, c)(accesscontrol.ReqViewer, evaluator)
 	}
 
-	groupedRules := make(map[ngmodels.AlertRuleGroupKey]ngmodels.SortedAlertRules)
+	groupedRules := make(map[ngmodels.AlertRuleGroupKey]ngmodels.SortableAlertRules)
 	for _, rule := range alertRuleQuery.Result {
 		key := rule.GetGroupKey()
 		rulesInGroup := groupedRules[key]
@@ -176,7 +176,7 @@ func (srv PrometheusSrv) RouteGetRuleStatuses(c *contextmodel.ReqContext) respon
 		sort.Sort(groupRules)
 	}
 
-	sortedGroups := make(ngmodels.SortedRuleGroupKeys, 0, len(groupedRules))
+	sortedGroups := make(ngmodels.SortableRuleGroupKeys, 0, len(groupedRules))
 	for groupKey, _ := range groupedRules {
 		sortedGroups = append(sortedGroups, groupKey)
 	}
